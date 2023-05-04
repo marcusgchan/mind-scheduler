@@ -2,6 +2,7 @@ import { Fragment, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { SignIn, useClerk, useUser } from "@clerk/nextjs";
+import { useRouter } from "next/router";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
@@ -9,19 +10,31 @@ function classNames(...classes: string[]) {
 
 type Navigation = {
   name: Name;
+  route: string;
   current: boolean;
 }[];
 
-type Name = "Calendar" | "Todo" | "Progress";
+type Name = "Calendar" | "Todo" | "Progress" | "Other";
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouter();
+
   const [navigation, setNavigation] = useState<Navigation>([
-    { name: "Calendar", current: true },
-    { name: "Todo", current: false },
-    { name: "Progress", current: false },
+    {
+      name: "Calendar",
+      route: "/calendar",
+      current: router.route.includes("calendar"),
+    },
+    { name: "Todo", route: "/todo", current: router.route.includes("todo") },
+    {
+      name: "Progress",
+      route: "/progress",
+      current: router.route.includes("progress"),
+    },
   ]);
 
-  const changePage = (pageName: Name) =>
+  const changePage = (pageName: Name, route: string) => {
+    router.push(route);
     setNavigation(
       navigation.map((item) =>
         item.name === pageName
@@ -29,18 +42,26 @@ export function Layout({ children }: { children: React.ReactNode }) {
           : { ...item, current: false }
       )
     );
+  };
 
   const { user } = useUser();
 
   const { signOut } = useClerk();
   const userNavigation = [
-    { name: "Your Profile", onClick: () => {} },
+    {
+      name: "Your Profile",
+      onClick: () => changePage("Other", "/user/settings"),
+    },
     { name: "Settings", onClick: () => {} },
     { name: "Sign out", onClick: () => signOut() },
   ];
 
   if (!user) {
-    return <div className="flex justify-center px-8 pt-8"><SignIn /></div>;
+    return (
+      <div className="flex justify-center px-8 pt-8">
+        <SignIn redirectUrl="/calendar" />
+      </div>
+    );
   }
 
   return (
@@ -64,7 +85,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         {navigation.map((item) => (
                           <button
                             key={item.name}
-                            onClick={() => changePage(item.name)}
+                            onClick={() => changePage(item.name, item.route)}
                             className={classNames(
                               item.current
                                 ? "bg-gray-900 text-white"
@@ -119,7 +140,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                                     onClick={item.onClick}
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 w-full text-left text-sm text-gray-700"
+                                      "block w-full px-4 py-2 text-left text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
