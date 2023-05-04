@@ -33,8 +33,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
     },
   ]);
 
-  const changePage = (pageName: Name, route: string) => {
-    router.push(route);
+  const changePage = async (pageName: Name, route: string) => {
+    await router.push(route);
     setNavigation(
       navigation.map((item) =>
         item.name === pageName
@@ -52,7 +52,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       name: "Your Profile",
       onClick: () => changePage("Other", "/user/settings"),
     },
-    { name: "Settings", onClick: () => {} },
+    { name: "Settings", onClick: undefined },
     { name: "Sign out", onClick: () => signOut() },
   ];
 
@@ -85,7 +85,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         {navigation.map((item) => (
                           <button
                             key={item.name}
-                            onClick={() => changePage(item.name, item.route)}
+                            onClick={() => {
+                              changePage(item.name, item.route);
+                            }}
                             className={classNames(
                               item.current
                                 ? "bg-indigo-950 text-white"
@@ -179,7 +181,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <Disclosure.Button
                       key={item.name}
                       as="button"
-                      onClick={() => changePage(item.name, item.route)}
+                      onClick={() => {
+                        changePage(item.name, item.route);
+                      }}
                       className={classNames(
                         item.current
                           ? "bg-indigo-950 text-white"
