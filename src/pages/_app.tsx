@@ -2,13 +2,15 @@ import { type AppType } from "next/app";
 import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import { ClerkProvider, SignIn, useUser } from "@clerk/nextjs";
-import Head from "next/head";
+import { Layout } from "~/components/Layout";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
     <>
       <ClerkProvider {...pageProps}>
-        <Component {...pageProps} />
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
       </ClerkProvider>
     </>
   );

@@ -1,25 +1,11 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
-
-const user = {
-  name: "Tom Cook",
-  email: "tom@example.com",
-  imageUrl:
-    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-};
-
-const navigation = [
-  { name: "Dashboard", href: "#", current: true },
-  { name: "Team", href: "#", current: false },
-  { name: "Projects", href: "#", current: false },
-  { name: "Calendar", href: "#", current: false },
-  { name: "Reports", href: "#", current: false },
-];
 
 const userNavigation = [
   { name: "Your Profile", href: "#" },
@@ -27,17 +13,37 @@ const userNavigation = [
   { name: "Sign out", href: "#" },
 ];
 
+type Navigation = {
+  name: Name;
+  current: boolean;
+}[];
+
+type Name = "Calendar" | "Todo" | "Progress";
+
 export function Layout({ children }: { children: React.ReactNode }) {
+  const [navigation, setNavigation] = useState<Navigation>([
+    { name: "Calendar", current: true },
+    { name: "Todo", current: false },
+    { name: "Progress", current: false },
+  ]);
+
+  const changePage = (pageName: Name) =>
+    setNavigation(
+      navigation.map((item) =>
+        item.name === pageName
+          ? { ...item, current: true }
+          : { ...item, current: false }
+      )
+    );
+
+  const { user } = useUser();
+
+  if (!user) {
+    return <div>Loading...</div>
+  }
+
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full bg-gray-100">
-        <body class="h-full">
-        ```
-      */}
       <div className="min-h-full">
         <Disclosure as="nav" className="bg-gray-800">
           {({ open }) => (
@@ -55,9 +61,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
                         {navigation.map((item) => (
-                          <a
+                          <button
                             key={item.name}
-                            href={item.href}
+                            onClick={() => changePage(item.name)}
                             className={classNames(
                               item.current
                                 ? "bg-gray-900 text-white"
@@ -67,7 +73,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             aria-current={item.current ? "page" : undefined}
                           >
                             {item.name}
-                          </a>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -87,10 +93,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         <div>
                           <Menu.Button className="flex max-w-xs items-center rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800">
                             <span className="sr-only">Open user menu</span>
+
                             <img
                               className="h-8 w-8 rounded-full"
-                              src={user.imageUrl}
-                              alt=""
+                              src={user.profileImageUrl}
+                              alt="user profile picture"
                             />
                           </Menu.Button>
                         </div>
@@ -149,8 +156,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                   {navigation.map((item) => (
                     <Disclosure.Button
                       key={item.name}
-                      as="a"
-                      href={item.href}
+                      as="button"
+                      onClick={() => changePage(item.name)}
                       className={classNames(
                         item.current
                           ? "bg-gray-900 text-white"
@@ -168,16 +175,16 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <div className="flex-shrink-0">
                       <img
                         className="h-10 w-10 rounded-full"
-                        src={user.imageUrl}
+                        src={user.profileImageUrl}
                         alt=""
                       />
                     </div>
                     <div className="ml-3">
                       <div className="text-base font-medium leading-none text-white">
-                        {user.name}
+                        {user.firstName}
                       </div>
                       <div className="text-sm font-medium leading-none text-gray-400">
-                        {user.email}
+                        {user.primaryEmailAddress?.emailAddress}
                       </div>
                     </div>
                     <button
