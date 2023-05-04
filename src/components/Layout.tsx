@@ -85,8 +85,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                         {navigation.map((item) => (
                           <button
                             key={item.name}
-                            onClick={() => {
-                              changePage(item.name, item.route);
+                            onClick={async () => {
+                              await changePage(item.name, item.route);
                             }}
                             className={classNames(
                               item.current
@@ -181,8 +181,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
                     <Disclosure.Button
                       key={item.name}
                       as="button"
-                      onClick={() => {
-                        changePage(item.name, item.route);
+                      onClick={async () => {
+                        await changePage(item.name, item.route);
                       }}
                       className={classNames(
                         item.current
