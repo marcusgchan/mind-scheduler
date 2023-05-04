@@ -1,3 +1,5 @@
+import WeekCalendar from "~/components/calendar/WeekCalendar";
+
 export default function Index() {
-  return <div>Calendar</div>
+  return <WeekCalendar /> 
 }

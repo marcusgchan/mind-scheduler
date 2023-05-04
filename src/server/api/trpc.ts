@@ -112,6 +112,8 @@ const isAuthed = t.middleware(({ next, ctx }) => {
   });
 });
 
+export const protectedProcedure = t.procedure.use(isAuthed);
+
 interface AuthContext {
   auth: SignedInAuthObject | SignedOutAuthObject;
 }
