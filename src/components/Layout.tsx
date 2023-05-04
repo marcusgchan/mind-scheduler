@@ -1,17 +1,11 @@
 import { Fragment, useState } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { SignIn, useClerk, useUser } from "@clerk/nextjs";
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(" ");
 }
-
-const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
-  { name: "Sign out", href: "#" },
-];
 
 type Navigation = {
   name: Name;
@@ -38,8 +32,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   const { user } = useUser();
 
+  const { signOut } = useClerk();
+  const userNavigation = [
+    { name: "Your Profile", onClick: () => {} },
+    { name: "Settings", onClick: () => {} },
+    { name: "Sign out", onClick: () => signOut() },
+  ];
+
   if (!user) {
-    return <div>Loading...</div>
+    return <div className="flex justify-center px-8 pt-8"><SignIn /></div>;
   }
 
   return (
@@ -114,15 +115,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
                             {userNavigation.map((item) => (
                               <Menu.Item key={item.name}>
                                 {({ active }) => (
-                                  <a
-                                    href={item.href}
+                                  <button
+                                    onClick={item.onClick}
                                     className={classNames(
                                       active ? "bg-gray-100" : "",
-                                      "block px-4 py-2 text-sm text-gray-700"
+                                      "block px-4 py-2 w-full text-left text-sm text-gray-700"
                                     )}
                                   >
                                     {item.name}
-                                  </a>
+                                  </button>
                                 )}
                               </Menu.Item>
                             ))}
