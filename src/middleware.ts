@@ -1,6 +1,8 @@
 import { getAuth, withClerkMiddleware } from "@clerk/nextjs/server";
+import { auth } from "@googleapis/oauth2";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { env } from "./env.mjs";
 
 // Set the paths that don't require the user to be signed in
 
@@ -12,7 +14,7 @@ const isPublic = (path: string) => {
   );
 };
 
-export default withClerkMiddleware((request: NextRequest) => {
+export default withClerkMiddleware(async (request: NextRequest) => {
   if (isPublic(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
@@ -25,17 +27,25 @@ export default withClerkMiddleware((request: NextRequest) => {
     signInUrl.searchParams.set("redirect_url", request.url);
     return NextResponse.redirect(signInUrl);
   }
-
   const requestedUrl = new URL(request.url);
-  const token = requestedUrl.searchParams.get("code");
+  const code = requestedUrl.searchParams.get("code");
   const scope = requestedUrl.searchParams.get("scope");
-  if (scope && token) {
-    const response = NextResponse.redirect(requestedUrl.origin + "/calendar?import=true");
-    response.cookies.set("googleOauthToken", token);
-    response.cookies.set("googleOauthScopes", scope);
+  if (scope && code) {
+    const response = NextResponse.redirect(
+      requestedUrl.origin + "/calendar?import=true"
+    );
+    const oAuth2Client = new auth.OAuth2(
+      env.GOOGLE_OAUTH_CLIENT_ID,
+      env.GOOGLE_OAUTH_CLIENT_SECRET,
+      env.GOOGLE_OAUTH_REDIRECT_URL
+    );
+    const { tokens } = await oAuth2Client.getToken(code);
+    const accessToken = tokens.access_token;
+    if (accessToken) {
+      response.cookies.set("googleOAuthAccessToken", accessToken);
+    }
     return response;
   }
-
   return NextResponse.next();
 });
 

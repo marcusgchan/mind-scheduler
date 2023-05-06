@@ -1,5 +1,5 @@
 import { useRouter } from "next/router";
-import { Fragment, SetStateAction, useState } from "react";
+import { Fragment, SetStateAction, useMemo, useRef, useState } from "react";
 import WeekCalendar from "~/components/calendar/WeekCalendar";
 import { api } from "~/utils/api";
 import { useSearchParams } from "next/navigation";
@@ -20,47 +20,36 @@ export default function Index() {
   const importing = searchParams.get("import");
   const isImporting = importing === "true";
   const closeModal = () =>
-    router.push({ pathname: router.pathname, query: { import: true } });
-  const openModal = () =>
     router.push({ pathname: router.pathname, query: { import: false } });
+  const openModal = () =>
+    router.push({ pathname: router.pathname, query: { import: true } });
 
-  // Get token and scope from cookies if exist
-  const token = document.cookie
-    .split("; ")
-    .find((ele) => ele.startsWith("googleOauthToken"))
-    ?.split("=")?.[1];
-  const encodedScopes = document.cookie
-    .split("; ")
-    .find((ele) => ele.startsWith("googleOauthScopes"))
-    ?.split("=")?.[1];
-  const decodedScopes = encodedScopes
-    ? decodeURIComponent(encodedScopes)
-    : null;
-  const formattedScopes = decodedScopes?.split(" ");
-  const [googleOauthState, setGoogleOauthState] = useState<{
-    token: string;
-    scopes: string[];
-  } | null>(
-    token && formattedScopes
-      ? {
-          token,
-          scopes: formattedScopes,
-        }
-      : null
-  );
+  const accessTokenRef = useRef<string>();
+    // Get token and scope from cookies if exist
+    accessTokenRef.current = document.cookie
+      .split("; ")
+      .find((ele) => ele.startsWith("googleOAuthAccessToken"))
+      ?.split("=")?.[1];
   return (
     <>
-      <button
-        onClick={() => {
-          oauthMutation.mutate();
-        }}
-      >
-        Import calendar
-      </button>
-      <ImportModal
-        isImporting={isImporting}
-        closeModal={closeModal}
-      />
+      {accessTokenRef.current ? (
+        <button
+          onClick={() => {
+            openModal();
+          }}
+        >
+          Import Calendar
+        </button>
+      ) : (
+        <button
+          onClick={() => {
+            oauthMutation.mutate();
+          }}
+        >
+          Import calendar
+        </button>
+      )}
+      <ImportModal isImporting={isImporting} closeModal={closeModal} />
       <WeekCalendar />
     </>
   );
