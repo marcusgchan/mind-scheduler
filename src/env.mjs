@@ -11,6 +11,7 @@ export const env = createEnv({
     CLERK_SECRET_KEY: z.string(),
     GOOGLE_OAUTH_CLIENT_SECRET: z.string(),
     GOOGLE_OAUTH_CLIENT_ID: z.string(),
+    GOOGLE_OAUTH_REDIRECT_URL: z.string(),
   },
 
   /**
@@ -33,5 +34,6 @@ export const env = createEnv({
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     GOOGLE_OAUTH_CLIENT_ID: process.env.GOOGLE_OAUTH_CLIENT_ID,
     GOOGLE_OAUTH_CLIENT_SECRET: process.env.GOOGLE_OAUTH_CLIENT_ID,
+    GOOGLE_OAUTH_REDIRECT_URL: process.env.GOOGLE_OAUTH_REDIRECT_URL
   },
 });

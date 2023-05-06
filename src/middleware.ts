@@ -26,6 +26,16 @@ export default withClerkMiddleware((request: NextRequest) => {
     return NextResponse.redirect(signInUrl);
   }
 
+  const requestedUrl = new URL(request.url);
+  const token = requestedUrl.searchParams.get("code");
+  const scope = requestedUrl.searchParams.get("scope");
+  if (scope && token) {
+    const response = NextResponse.redirect(requestedUrl.origin + "/calendar?import=true");
+    response.cookies.set("googleOauthToken", token);
+    response.cookies.set("googleOauthScopes", scope);
+    return response;
+  }
+
   return NextResponse.next();
 });
 

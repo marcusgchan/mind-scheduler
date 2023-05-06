@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.16.4",
+    "@googleapis/calendar": "^6.0.0",
     "@googleapis/oauth2": "^1.0.0",
     "@headlessui/react": "^1.7.14",
     "@heroicons/react": "^2.0.17",
