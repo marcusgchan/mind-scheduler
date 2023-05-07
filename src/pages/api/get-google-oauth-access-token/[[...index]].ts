@@ -24,12 +24,13 @@ export default async function handler(
   res: NextApiResponse<{}>
 ) {
   if (!req.url) return res.status(400).redirect("/calendar");
-  
-  const protocol = req.headers["x-forwarded-proto"] as string | undefined
+
+  const protocol = req.headers["x-forwarded-proto"] as string | undefined;
   if (!protocol && (protocol === "http" || protocol === "https")) {
     return res.status(500).redirect("/calendar");
   }
 
+  // Fetch access token from code
   const requestedUrl = new URL(req.url, `${protocol}://${req.headers.host}`);
   const code = requestedUrl.searchParams.get("code");
   const scope = requestedUrl.searchParams.get("scope");
@@ -40,16 +41,20 @@ export default async function handler(
       env.GOOGLE_OAUTH_REDIRECT_URL
     );
     try {
-    const { tokens } = await oAuth2Client.getToken(decodeURIComponent(code));
-    const accessToken = tokens.access_token as string;
-    setCookie(res, "googleOAuthAcessToken", accessToken, {
-      sameSite: "strict",
-    });
-    } catch(e) {
-      console.log(new Date());
-      console.log(e)
+      const { tokens } = await oAuth2Client.getToken(decodeURIComponent(code));
+      const accessToken = tokens.access_token as string;
+      setCookie(res, "googleOAuthAcessToken", accessToken, {
+        sameSite: "strict",
+      });
+    } catch (e) {
+      // Unable to fetch access token
+      // This shouldn't happen b/c this route is a oauth callback so the
+      // code to generate the token should be fresh
+      return res.status(400).redirect("/calendar");
     }
 
     res.redirect("/calendar?import=true");
   }
+
+  res.status(400).redirect("/calendar");
 }
