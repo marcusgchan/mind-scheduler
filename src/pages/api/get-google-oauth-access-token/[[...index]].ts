@@ -26,7 +26,7 @@ export default async function handler(
   if (!req.url) return res.status(400).redirect("/calendar");
   
   const protocol = req.headers["x-forwarded-proto"] as string | undefined
-  if (!protocol && protocol === "http" || protocol === "https") {
+  if (!protocol && (protocol === "http" || protocol === "https")) {
     return res.status(500).redirect("/calendar");
   }
 
@@ -39,14 +39,14 @@ export default async function handler(
       env.GOOGLE_OAUTH_CLIENT_SECRET,
       env.GOOGLE_OAUTH_REDIRECT_URL
     );
-    console.log(env.GOOGLE_OAUTH_REDIRECT_URL)
     try {
-    const { tokens } = await oAuth2Client.getToken(code);
+    const { tokens } = await oAuth2Client.getToken(decodeURIComponent(code));
     const accessToken = tokens.access_token as string;
     setCookie(res, "googleOAuthAcessToken", accessToken, {
       sameSite: "strict",
     });
     } catch(e) {
+      console.log(new Date());
       console.log(e)
     }
 
