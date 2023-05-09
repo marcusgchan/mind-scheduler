@@ -46,6 +46,7 @@ export default async function handler(
       setCookie(res, "googleOAuthAccessToken", accessToken, {
         path: "/",
         sameSite: "strict",
+        maxAge: 60 * 60 // 1 h
       });
     } catch (e) {
       // Unable to fetch access token
