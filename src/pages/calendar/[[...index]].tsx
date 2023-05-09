@@ -1,5 +1,13 @@
 import { useRouter } from "next/router";
-import { Fragment, SetStateAction, useMemo, useRef, useState } from "react";
+import {
+  Fragment,
+  MutableRefObject,
+  RefObject,
+  SetStateAction,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import WeekCalendar from "~/components/calendar/WeekCalendar";
 import { api } from "~/utils/api";
 import { useSearchParams } from "next/navigation";
@@ -8,6 +16,7 @@ import {
   ExclamationTriangleIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Index() {
   const oauthMutation = api.calendar.generateAuthUrl.useMutation({
@@ -25,11 +34,11 @@ export default function Index() {
     router.push({ pathname: router.pathname, query: { import: true } });
 
   const accessTokenRef = useRef<string>();
-    // Get token and scope from cookies if exist
-    accessTokenRef.current = document.cookie
-      .split("; ")
-      .find((ele) => ele.startsWith("googleOAuthAccessToken"))
-      ?.split("=")?.[1];
+  // Get token and scope from cookies if exist
+  accessTokenRef.current = document.cookie
+    .split("; ")
+    .find((ele) => ele.startsWith("googleOAuthAccessToken"))
+    ?.split("=")?.[1];
   return (
     <>
       {accessTokenRef.current ? (
@@ -49,19 +58,31 @@ export default function Index() {
           Import calendar
         </button>
       )}
-      <ImportModal isImporting={isImporting} closeModal={closeModal} />
+      <ImportModal
+        accessTokenRef={accessTokenRef}
+        isImporting={isImporting}
+        closeModal={closeModal}
+      />
       <WeekCalendar />
     </>
   );
 }
 
 function ImportModal({
+  accessTokenRef,
   isImporting,
   closeModal,
 }: {
+  accessTokenRef: MutableRefObject<string | undefined>;
   isImporting: boolean;
   closeModal: () => void;
 }) {
+  /*useQuery({
+    queryKey: ["calendars"],
+    queryFn: () => {
+      return calendar({ version: "v3", auth: accessTokenRef.current }).calendarList;
+    },
+  });*/
   return (
     <Transition.Root show={isImporting} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={closeModal}>

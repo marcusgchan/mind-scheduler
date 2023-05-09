@@ -43,7 +43,8 @@ export default async function handler(
     try {
       const { tokens } = await oAuth2Client.getToken(decodeURIComponent(code));
       const accessToken = tokens.access_token as string;
-      setCookie(res, "googleOAuthAcessToken", accessToken, {
+      setCookie(res, "googleOAuthAccessToken", accessToken, {
+        path: "/",
         sameSite: "strict",
       });
     } catch (e) {
