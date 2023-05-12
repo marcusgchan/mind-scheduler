@@ -45,4 +45,5 @@ export default function Index(
     new Set()
   );
   console.log(props.calendars);
+  return <div>hello</div>;
 }
