@@ -1,4 +1,4 @@
-/*import {Kysely} from 'kysely'
+import {Kysely} from 'kysely'
 import {PlanetScaleDialect} from 'kysely-planetscale'
 
 const db = new Kysely<Database>({
@@ -7,4 +7,4 @@ const db = new Kysely<Database>({
     username: '<user>',
     password: '<password>',
   }),
-})*/
+})
