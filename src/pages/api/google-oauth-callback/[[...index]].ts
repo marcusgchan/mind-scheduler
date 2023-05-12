@@ -45,8 +45,6 @@ export default async function handler(
       oAuth2Client.setCredentials(tokens);
       const accessToken = tokens.access_token as string;
 
-      const t = await calendar({ version: "v3", auth: oAuth2Client }).calendarList.list();
-      console.log(t);
       setCookie(res, "googleOAuthAccessToken", accessToken, {
         path: "/",
         sameSite: "strict",
@@ -54,7 +52,8 @@ export default async function handler(
         maxAge: 60 * 60, // 1 h
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
+      // TODO: Log this
       // Unable to fetch access token
       // This shouldn't happen b/c this route is a oauth callback so the
       // code to generate the token should be fresh
