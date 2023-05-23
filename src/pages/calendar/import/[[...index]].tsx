@@ -1,8 +1,10 @@
 import { getAuth } from "@clerk/nextjs/server";
 import { auth, calendar, calendar_v3 } from "@googleapis/calendar";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { env } from "~/env.mjs";
+import { api } from "~/utils/api";
 
 type Output = {
   calendars: calendar_v3.Schema$CalendarList["items"] | undefined | null;
@@ -44,6 +46,11 @@ export default function Index(
   const [selectedCalendars, setSelectedCalendars] = useState<Set<string>>(
     new Set()
   );
+  console.log(props.calendars);
+
+  const router = useRouter();
+
+  const importCalendar = api.calendar.importCalendars.useMutation();
 
   const [checkedAll, setCheckedAll] = useState(false);
   const handleCheckedAll = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,15 +79,27 @@ export default function Index(
       setCheckedAll(false);
     }
   };
-  
+
   const handleImport = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const formattedCalendars = props.calendars
+      ?.filter((calendar) => calendar.id && selectedCalendars.has(calendar.id))
+      .map((calendar) => ({
+        id: calendar.id as string, // String must be defined since it checked in filter
+        backgroundColor: calendar.backgroundColor,
+        title: calendar.summary,
+      }));
+    if (formattedCalendars) {
+      importCalendar.mutate({ calendars: formattedCalendars });
+    } else {
+      router.push("/calendar");
+    }
   };
 
   if (!props.calendars) return <div>No calendars to import</div>;
 
   return (
-    <form onSubmit={handleImport}>
+    <form onSubmit={handleImport} className="max-w-md">
       <div className="mt-4 divide-y divide-gray-200 border-b border-t border-gray-200">
         <div className="flex items-center justify-between py-4">
           <legend className="text-base font-semibold leading-6 text-gray-900">
@@ -125,11 +144,18 @@ export default function Index(
           </div>
         ))}
       </div>
-      <button
-        className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-      >
-        Import
-      </button>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          className="rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-red-600"
+          onClick={() => router.push("/calendar")}
+        >
+          Back
+        </button>
+        <button className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+          Import
+        </button>
+      </div>
     </form>
   );
 }

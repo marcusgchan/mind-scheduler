@@ -17,7 +17,7 @@
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 
 /** Replace this with an object if you want to pass things to `createContextInner`. */
-type CreateContextOptions = AuthContext;
+type CreateContextOptions = AuthContext & {req: NextApiRequest};
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -31,7 +31,8 @@ type CreateContextOptions = AuthContext;
  */
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
-    auth: opts.auth
+    auth: opts.auth,
+    req: opts.req,
   };
 };
 
@@ -42,7 +43,7 @@ const createInnerTRPCContext = (opts: CreateContextOptions) => {
  * @see https://trpc.io/docs/context
  */
 export const createTRPCContext = (opts: CreateNextContextOptions) => {
-  return createInnerTRPCContext({ auth:  getAuth(opts.req) });
+  return createInnerTRPCContext({ auth:  getAuth(opts.req), req: opts.req });
 };
 
 /**
@@ -58,6 +59,7 @@ import { ZodError } from "zod";
 import { getAuth, clerkClient } from '@clerk/nextjs/server'
 
 import type { SignedInAuthObject,SignedOutAuthObject } from "@clerk/nextjs/dist/api";
+import { NextApiRequest } from "next";
 
 
 
